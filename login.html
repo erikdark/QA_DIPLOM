@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход</title>
+    <style>
+      body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    height: 100vh;
+    background-color: #f0f0f0;
+    margin: 0;
+}
+
+.container {
+    background-color: #fff;
+    padding: 20px;
+    margin: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 300px;
+}
+
+h2, h3 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+label {
+    margin-bottom: 5px;
+}
+
+input {
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+button {
+    padding: 10px;
+    background-color: #007BFF;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+#loginMessage, #addUserMessage {
+    margin-top: 20px;
+    text-align: center;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+th, td {
+    padding: 10px;
+    border: 1px solid #ccc;
+    text-align: center;
+}
+
+th {
+    background-color: #007BFF;
+    color: #fff;
+}
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Вход</h2>
+        <form id="loginForm">
+            <label for="login">Логин:</label>
+            <input type="text" id="login" name="login" required>
+            
+            <label for="password">Пароль:</label>
+            <input type="password" id="password" name="password" required>
+            
+            <button type="submit">Войти</button>
+        </form>
+        <div id="loginMessage"></div>
+    </div>
+    
+    <div class="container">
+        <h3>Список пользователей</h3>
+        <table id="userTable">
+            <thead>
+                <tr>
+                    <th>Логин</th>
+                    <th>Пароль</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Пример существующих пользователей -->
+                <tr>
+                    <td>user1</td>
+                    <td>Pass1234</td>
+                </tr>
+                <tr>
+                    <td>user2</td>
+                    <td>Pass1234</td>
+                </tr>
+                <tr>
+                    <td>user3</td>
+                    <td>Pass1234</td>
+                </tr>
+                <tr>
+                    <td>user4</td>
+                    <td>Pass1234</td>
+                </tr>
+                <tr>
+                    <td>user5</td>
+                    <td>Pass1234</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <h3>Добавить пользователя</h3>
+        <form id="addUserForm">
+            <label for="newLogin">Логин:</label>
+            <input type="text" id="newLogin" name="newLogin" required>
+            
+            <label for="newPassword">Пароль:</label>
+            <input type="text" id="newPassword" name="newPassword" required>
+            
+            <button type="submit">Добавить</button>
+        </form>
+        <div id="addUserMessage"></div>
+    </div>
+    
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+    const users = [
+        { login: 'user1', password: 'Pass1234' },
+        { login: 'user2', password: 'Pass1234' },
+        { login: 'user3', password: 'Pass1234' },
+        { login: 'user4', password: 'Pass1234' },
+        { login: 'user5', password: 'Pass1234' }
+    ];
+
+    const loginForm = document.getElementById('loginForm');
+    const loginMessage = document.getElementById('loginMessage');
+    const addUserForm = document.getElementById('addUserForm');
+    const addUserMessage = document.getElementById('addUserMessage');
+    const userTable = document.getElementById('userTable').getElementsByTagName('tbody')[0];
+
+    
+    function updateUserTable() {
+        userTable.innerHTML = '';
+        users.forEach(user => {
+            const row = userTable.insertRow();
+            const cellLogin = row.insertCell(0);
+            const cellPassword = row.insertCell(1);
+            cellLogin.textContent = user.login;
+            cellPassword.textContent = user.password;
+        });
+    }
+
+    
+    updateUserTable();
+
+    
+    loginForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        const login = document.getElementById('login').value;
+        const password = document.getElementById('password').value;
+
+        const user = users.find(user => user.login === login && user.password === password);
+
+        if (user) {
+            loginMessage.textContent = 'Вход успешен!';
+            loginMessage.style.color = 'green';
+        } else {
+            loginMessage.textContent = 'Неверный логин или пароль';
+            loginMessage.style.color = 'red';
+        }
+    });
+
+    
+    addUserForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        const newLogin = document.getElementById('newLogin').value;
+        const newPassword = document.getElementById('newPassword').value;
+
+        if (newLogin && newPassword) {
+            users.push({ login: newLogin, password: newPassword });
+            updateUserTable();
+            addUserMessage.textContent = 'Пользователь добавлен!';
+            addUserMessage.style.color = 'green';
+        } else {
+            addUserMessage.textContent = 'Введите логин и пароль';
+            addUserMessage.style.color = 'red';
+        }
+
+        
+        document.getElementById('newLogin').value = '';
+        document.getElementById('newPassword').value = '';
+    });
+});
+
+    </script>
+</body>
+</html>
