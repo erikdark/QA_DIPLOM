@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Эмуляция базы данных</title>
+   <style>
+     body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    margin: 0;
+    padding: 20px;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h2, h3 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.db-section, .sql-console {
+    margin-bottom: 20px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 10px;
+    border: 1px solid #ccc;
+    text-align: center;
+}
+
+th {
+    background-color: #007BFF;
+    color: #fff;
+}
+
+.delete-button {
+    padding: 5px 10px;
+    background-color: #FF0000;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.delete-button:hover {
+    background-color: #cc0000;
+}
+
+textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+button {
+    margin-top: 10px;
+    padding: 10px 20px;
+    background-color: #007BFF;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+#sqlMessage {
+    margin-top: 20px;
+    text-align: center;
+}
+
+   </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Эмуляция базы данных</h2>
+        <div class="db-section">
+            <table id="dataTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Имя</th>
+                        <th>Возраст</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Пример записей -->
+                    <tr>
+                        <td>1</td>
+                        <td>Иван</td>
+                        <td>25</td>
+                        <td><button class="delete-button">Удалить</button></td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>Анна</td>
+                        <td>30</td>
+                        <td><button class="delete-button">Удалить</button></td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>Петр</td>
+                        <td>22</td>
+                        <td><button class="delete-button">Удалить</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="sql-console">
+            <h3>SQL Консоль</h3>
+            <textarea id="sqlQuery" rows="4" cols="50" placeholder="Введите SQL запрос здесь..."></textarea>
+            <button id="executeButton">Выполнить</button>
+            <div id="sqlMessage"></div>
+        </div>
+    </div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+    const dataTable = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
+    const sqlQuery = document.getElementById('sqlQuery');
+    const executeButton = document.getElementById('executeButton');
+    const sqlMessage = document.getElementById('sqlMessage');
+
+    // Функция для обновления таблицы
+    function updateTable(data) {
+        dataTable.innerHTML = '';
+        data.forEach(row => {
+            const newRow = dataTable.insertRow();
+            Object.keys(row).forEach(key => {
+                const cell = newRow.insertCell();
+                cell.textContent = row[key];
+            });
+            const actionsCell = newRow.insertCell();
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = 'Удалить';
+            deleteButton.className = 'delete-button';
+            deleteButton.addEventListener('click', () => {
+                deleteRow(row.id);
+            });
+            actionsCell.appendChild(deleteButton);
+        });
+    }
+
+    // Инициализация данных
+    const data = [
+        { id: 1, name: 'Иван', age: 25 },
+        { id: 2, name: 'Анна', age: 30 },
+        { id: 3, name: 'Петр', age: 22 }
+    ];
+    updateTable(data);
+
+    // Обработчик кнопки удаления
+    function deleteRow(id) {
+        const index = data.findIndex(row => row.id === id);
+        if (index !== -1) {
+            data.splice(index, 1);
+            updateTable(data);
+            sqlMessage.textContent = `Запись с ID ${id} удалена.`;
+            sqlMessage.style.color = 'green';
+        }
+    }
+
+    // Обработчик кнопки выполнения SQL-запроса
+    executeButton.addEventListener('click', () => {
+        const query = sqlQuery.value.trim().toUpperCase();
+        sqlMessage.textContent = '';
+        if (query.startsWith('SELECT')) {
+            const match = query.match(/SELECT \* FROM TABLE WHERE NAME = '(.*)'/);
+            if (match) {
+                const name = match[1];
+                const filteredData = data.filter(row => row.name.toUpperCase() === name);
+                updateTable(filteredData);
+                sqlMessage.textContent = `Найдено ${filteredData.length} записей.`;
+                sqlMessage.style.color = 'green';
+            } else {
+                sqlMessage.textContent = 'Неправильный запрос SELECT. Используйте: SELECT * FROM TABLE WHERE NAME = \'имя\'';
+                sqlMessage.style.color = 'red';
+            }
+        } else if (query.startsWith('DELETE')) {
+            const match = query.match(/DELETE FROM TABLE WHERE ID = (\d+)/);
+            if (match) {
+                const id = parseInt(match[1]);
+                deleteRow(id);
+            } else {
+                sqlMessage.textContent = 'Неправильный запрос DELETE. Используйте: DELETE FROM TABLE WHERE ID = число';
+                sqlMessage.style.color = 'red';
+            }
+        } else if (query.startsWith('ORDER BY')) {
+            const match = query.match(/ORDER BY (NAME|AGE)/);
+            if (match) {
+                const field = match[1].toLowerCase();
+                const sortedData = [...data].sort((a, b) => a[field] > b[field] ? 1 : -1);
+                updateTable(sortedData);
+                sqlMessage.textContent = `Данные отсортированы по ${field}.`;
+                sqlMessage.style.color = 'green';
+            } else {
+                sqlMessage.textContent = 'Неправильный запрос ORDER BY. Используйте: ORDER BY name или ORDER BY age';
+                sqlMessage.style.color = 'red';
+            }
+        } else {
+            sqlMessage.textContent = 'Неизвестная команда. Доступные команды: SELECT, DELETE, ORDER BY';
+            sqlMessage.style.color = 'red';
+        }
+    });
+});
+
+    </script>
+</body>
+</html>
